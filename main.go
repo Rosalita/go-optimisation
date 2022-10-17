@@ -12,7 +12,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
+	//"io"
 )
 
 // data represents a table of input and expected output.
@@ -88,12 +88,18 @@ func algOne(data []byte, find []byte, repl []byte, output *bytes.Buffer) {
 	size := len(find)
 
 	// Declare the buffers we need to process the stream.
-	buf := make([]byte, size)
+	// original:
+	// buf := make([]byte, size)
+	// optimised:
+	buf := make([]byte, 5)
 	//	tmp := make([]byte, 1)
 	end := size - 1
 
 	// Read in an initial number of bytes we need to get started.
-	if n, err := io.ReadFull(input, buf[:end]); err != nil {
+	// original line:
+	// if n, err := io.ReadFull(input, buf[:end]); err != nil {
+	// optimised line:
+	if n, err := input.Read(buf[:end]); err != nil {
 		output.Write(buf[:n])
 		return
 	}
@@ -101,18 +107,32 @@ func algOne(data []byte, find []byte, repl []byte, output *bytes.Buffer) {
 	for {
 
 		// Read in one byte from the input stream.
-		if _, err := io.ReadFull(input, buf[end:]); err != nil {
+
+		// original line:
+		// if _, err := io.ReadFull(input, buf[end:]); err != nil {
+		// first optimised line:
+		// if _, err := input.Read(buf[end:]); err != nil {
+		// second optimised line:
+		var err error
+		buf[end:][0], err = input.ReadByte()
+		if err != nil {
 			// Flush the reset of the bytes we have.
 			output.Write(buf[:end])
 			return
 		}
 
 		// if we have a match, replace the bytes.
-		if bytes.Compare(buf, find) == 0 {
+		// original:
+		// if bytes.Compare(buf, find) == 0 {
+		// optimised:
+		if bytes.Equal(buf, find) {
 			output.Write(repl)
 
 			//Read a new initial number of bytes.
-			if n, err := io.ReadFull(input, buf[:end]); err != nil {
+			// original line
+			// if n, err := io.ReadFull(input, buf[:end]); err != nil {
+			// optimised line
+			if n, err := input.Read(buf[:end]); err != nil {
 				output.Write(buf[:n])
 				return
 			}

@@ -119,6 +119,25 @@ BenchmarkAlgOne-16       3899920               926.3 ns/op             0 B/op   
 BenchmarkAlgTwo-16      10743843               338.9 ns/op             0 B/op          0 allocs/op
 ```
 
+Paste the escape analysis in a new file.
+Find "function too complex" to identify functions which are too complex to inline.
+Note that complexity can be reduced by avoiding loops and avoiding further function calls.
+
+Find "escapes to heap" to identify the functions that cause allocations.
+
+## Compiler's SSA (static single assignment) Backend
+
+The Go compilers SSA backend has the ability to produce html debugging output of the compilation phase.
+See https://dave.cheney.net/2020/06/19/how-to-dump-the-gossafunc-graph-for-a-method
+
+`GOSSAFUNC=algOne go build`
+
+Creates a ssa.html file which can be opened in a browser
+
+https://go.dev/src/cmd/compile/internal/ssa/README
+
+This shows the code after each compiler pass and the final generated assembly.
+
 ## Benchmark and CPU Profiling
 
 The benchmarks can generate a cpu profile
@@ -211,3 +230,7 @@ Replacing input.Read() for input.ReadByte() results in the following benchmark:
 BenchmarkAlgOne-16       4726576               761.7 ns/op             0 B/op          0 allocs/op
 BenchmarkAlgTwo-16       8589955               419.4 ns/op             0 B/op          0 allocs/op
 ```
+
+# Benchstat
+
+https://pkg.go.dev/golang.org/x/perf/cmd/benchstat#section-readme
